@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>明日香revive幻想农场</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+    <!-- 登录/注册 -->
+    <div id="auth-screen">
+        <div class="auth-card">
+            <h1>明日香revive幻想农场</h1>
+            <p style="color:#64748b; margin-bottom: 2rem;">二次元·现代农场</p>
+            <input type="text" id="username" class="auth-input" placeholder="输入用户名" autocomplete="off">
+            <input type="password" id="password" class="auth-input" placeholder="输入密码">
+            <div style="display: flex; gap: 10px;">
+                <button onclick="login()" class="btn btn-primary" style="flex:1">登录</button>
+                <button onclick="register()" class="btn btn-secondary" style="flex:1">注册</button>
+            </div>
+            <p id="auth-message" style="margin-top: 1rem; color: #f43f5e;"></p>
+        </div>
+    </div>
+
+    <!-- 游戏主界面 -->
+    <div id="game-screen" class="hidden">
+
+        <!-- 顶部导航 -->
+        <header class="hud">
+            <div class="user-stats">
+                <span id="display-username" style="font-weight:bold; font-size: 1.1rem;">Player</span>
+                <div class="stat-pill gold">
+                    <span>💰</span> <span id="display-gold">0</span>
+                </div>
+                <div class="stat-pill timer" title="市场价格下次波动时间">
+                    <span>📈</span> <span id="timer">--:--:--</span>
+                </div>
+            </div>
+
+            <div id="farm-mode-indicator" class="hidden"
+                style="background:#fef2f2; color:#ef4444; padding:5px 10px; border-radius:8px; font-weight:bold;">
+                当前正在访问: <span id="visiting-name"></span> 的农场 (点击成熟作物偷取!)
+            </div>
+
+            <div class="nav-actions">
+                <button onclick="backToMyFarm()" id="btn-home" class="btn btn-secondary hidden">🏠 回家</button>
+                <button onclick="openShop()" class="btn btn-primary">🏪 交易所 / 仓库</button>
+                <button onclick="openSocial()" class="btn btn-secondary">🌍 社交中心</button>
+                <button onclick="logout()" class="btn btn-danger btn-sm">退出</button>
+            </div>
+        </header>
+
+        <!-- 主布局 -->
+        <main class="main-layout">
+
+            <!-- 左侧边栏: 我的角色 -->
+            <aside class="sidebar">
+                <div class="sidebar-header">我的伙伴</div>
+                <div class="sidebar-content" id="char-list-left">
+                    <!-- 动态生成 -->
+                </div>
+            </aside>
+
+            <!-- 中间: 农田 -->
+            <section class="farm-area">
+                <div id="farm-grid" class="farm-grid">
+                    <!-- 9x9 -->
+                </div>
+            </section>
+
+            <!-- 右侧边栏: 更多角色/信息 -->
+            <aside class="sidebar">
+                <div class="sidebar-header">珍藏馆</div>
+                <div class="sidebar-content" id="char-list-right">
+                    <!-- 动态生成 -->
+                </div>
+            </aside>
+
+        </main>
+    </div>
+
+    <!-- 商店模态框 -->
+    <div id="shop-modal" class="modal hidden">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h2>交易所</h2>
+                <button onclick="closeModal('shop-modal')" class="btn btn-sm btn-secondary">✕</button>
+            </div>
+            <div class="modal-tabs">
+                <div class="tab-item active" onclick="switchShopTab('buy')">购买种子</div>
+                <div class="tab-item" onclick="switchShopTab('sell')">出售作物</div>
+                <div class="tab-item" onclick="switchShopTab('chars')">角色招募</div>
+            </div>
+            <div class="modal-body">
+                <div id="shop-content-buy" class="shop-grid"></div>
+                <div id="shop-content-sell" class="shop-grid hidden"></div>
+                <div id="shop-content-chars" class="shop-grid hidden"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 社交模态框 -->
+    <div id="social-modal" class="modal hidden">
+        <div class="modal-card" style="width: 500px; height: 60vh;">
+            <div class="modal-header">
+                <h2>社交中心</h2>
+                <button onclick="closeModal('social-modal')" class="btn btn-sm btn-secondary">✕</button>
+            </div>
+            <div class="modal-body" style="background: #f8fafc;">
+                <p style="color: #64748b; margin-bottom: 10px;">去邻居家串门（顺便偷个菜）吧！</p>
+                <div id="neighbor-list" style="display: flex; flex-direction: column; gap: 8px;">
+                    <!-- 邻居列表 -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 通知容器 -->
+    <div id="toast-container"></div>
+
+    <script src="app.js"></script>
+</body>
+
+</html>
