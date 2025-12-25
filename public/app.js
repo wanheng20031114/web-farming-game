@@ -278,7 +278,7 @@ function handleFarmInteraction(x, y) {
 
 // Actions
 async function buyLand(x, y) {
-    if (!confirm(`花费 100 金币解锁 (${x},${y})?`)) return;
+    if (!confirm(`花费 1000 金币解锁 (${x},${y})?`)) return;
     apiCall('/farm/buy', { userId: currentUser.id, x, y });
 }
 
