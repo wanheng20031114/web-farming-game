@@ -103,6 +103,22 @@ const Market = sequelize.define('Market', {
     }
 });
 
+// 通知模型
+const Notification = sequelize.define('Notification', {
+    message: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    type: {
+        type: DataTypes.STRING, // 'theft' etc.
+        defaultValue: 'info'
+    },
+    isRead: {
+        type: DataTypes.BOOLEAN,
+        defaultValue: false
+    }
+});
+
 // 建立关联
 User.hasMany(Farm);
 Farm.belongsTo(User);
@@ -114,4 +130,7 @@ Inventory.belongsTo(User);
 User.hasMany(Character);
 Character.belongsTo(User);
 
-module.exports = { User, Farm, Inventory, Character, Market, sequelize };
+User.hasMany(Notification);
+Notification.belongsTo(User);
+
+module.exports = { User, Farm, Inventory, Character, Market, Notification, sequelize };
