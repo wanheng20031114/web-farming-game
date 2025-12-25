@@ -322,6 +322,15 @@ async function steal(x, y) {
     } catch (e) { showToast(e.message); }
 }
 
+// Helper: Format Time
+function formatTime(ms) {
+    if (!ms) return '';
+    const hours = Math.floor(ms / 3600000);
+    const minutes = Math.floor((ms % 3600000) / 60000);
+    if (hours > 0) return `(${hours}小时${minutes > 0 ? minutes + '分' : ''})`;
+    return `(${minutes}分钟)`;
+}
+
 async function apiCall(endpoint, body) {
     try {
         const res = await fetch(`${API_BASE}${endpoint}`, {
@@ -347,8 +356,10 @@ function openPlantMenu(x, y) {
     // Simple prompt
     let msg = "选择种子:\n";
     seeds.forEach((s, idx) => {
-        const name = marketData.seeds[s.itemId]?.name || s.itemId;
-        msg += `${idx + 1}. ${name} (x${s.count})\n`;
+        const seedData = marketData.seeds[s.itemId];
+        const name = seedData?.name || s.itemId;
+        const time = seedData ? formatTime(seedData.growTime) : '';
+        msg += `${idx + 1}. ${name} (x${s.count}) ${time}\n`;
     });
     const choice = prompt(msg);
     if (choice) {
@@ -463,15 +474,16 @@ function renderShopTabContent(tab) {
                 </div>
             `;
         });
-    }
-}
 
-// Toast
-function showToast(msg) {
-    const list = document.getElementById('toast-container');
-    const div = document.createElement('div');
-    div.className = 'toast';
-    div.innerHTML = `<div class="toast-title">消息</div><div class="toast-msg">${msg}</div>`;
-    list.appendChild(div);
-    setTimeout(() => div.remove(), 5000);
+
+        // Toast
+        function showToast(msg) {
+            const list = document.getElementById('toast-container');
+            const div = document.createElement('div');
+            div.className = 'toast';
+            div.innerHTML = `<div class="toast-title">消息</div><div class="toast-msg">${msg}</div>`;
+            list.appendChild(div);
+            setTimeout(() => div.remove(), 5000);
+        }
+    }
 }
