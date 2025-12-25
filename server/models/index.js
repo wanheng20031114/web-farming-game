@@ -16,7 +16,7 @@ const User = sequelize.define('User', {
     },
     gold: {
         type: DataTypes.INTEGER,
-        defaultValue: 1000,
+        defaultValue: 100000,
         comment: '金币数量'
     }
 });

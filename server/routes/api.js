@@ -122,7 +122,24 @@ router.get('/data', async (req, res) => {
         const user = await User.findByPk(userId);
         if (!user) return res.status(404).json({ error: '用户未找到' });
 
-        const farms = await Farm.findAll({ where: { UserId: userId } });
+        let farms = await Farm.findAll({ where: { UserId: userId } });
+
+        // 延迟初始化: 如果因为某种原因该用户没有农田数据 (比如是旧账号)，则在这里创建
+        if (farms.length === 0) {
+            const newFarms = [];
+            for (let x = 0; x < 9; x++) {
+                for (let y = 0; y < 9; y++) {
+                    const isUnlocked = x < 3 && y < 3;
+                    newFarms.push({
+                        UserId: userId,
+                        x,
+                        y,
+                        isUnlocked
+                    });
+                }
+            }
+            farms = await Farm.bulkCreate(newFarms);
+        }
         const inventory = await Inventory.findAll({ where: { UserId: userId } });
         const characters = await Character.findAll({ where: { UserId: userId } });
 
@@ -142,7 +159,7 @@ router.get('/data', async (req, res) => {
 // 购买地块
 router.post('/farm/buy', async (req, res) => {
     const { userId, x, y } = req.body;
-    const PRICE = 1000;
+    const PRICE = 100;
 
     const t = await sequelize.transaction();
     try {

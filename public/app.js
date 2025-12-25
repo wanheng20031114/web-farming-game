@@ -26,6 +26,7 @@ let marketData = {
 };
 
 let timerInterval = null;
+let farmRenderer = null;
 
 // --- Auth ---
 async function login() {
@@ -89,10 +90,18 @@ function logout() {
     clearInterval(timerInterval);
 }
 
-function enterGame() {
+async function enterGame() {
     document.getElementById('auth-screen').classList.add('hidden');
     document.getElementById('game-screen').classList.remove('hidden');
     document.getElementById('display-username').innerText = currentUser.username;
+
+    // 初始化渲染器
+    if (!farmRenderer) {
+        farmRenderer = new FarmRenderer('farm-canvas-container', {
+            onInteract: handleFarmInteraction
+        });
+        await farmRenderer.init();
+    }
 
     refreshData();
     checkNotifications(); // 登录时检查通知
@@ -136,7 +145,11 @@ async function refreshData() {
         // 如果正在访问，刷新目标农场数据 (以便看到是否被别人偷了)
         await refreshVisitData();
     } else {
-        renderFarm(gameState.myFarms, true); // 渲染我的农场
+        console.log("App.js calling render. myFarms length:", gameState.myFarms ? gameState.myFarms.length : 0);
+        if (gameState.myFarms && gameState.myFarms.length > 0) {
+            console.log("First farm item:", gameState.myFarms[0]);
+        }
+        if (farmRenderer) farmRenderer.render(gameState.myFarms, marketData); // 渲染我的农场
     }
 }
 
@@ -146,7 +159,7 @@ async function refreshVisitData() {
         const res = await fetch(`${API_BASE}/social/farm/${gameState.visitTarget.id}`);
         const data = await res.json();
         gameState.visitFarms = data.farms;
-        renderFarm(gameState.visitFarms, false); // 渲染别人农场
+        if (farmRenderer) farmRenderer.render(gameState.visitFarms, marketData); // 渲染别人农场
     } catch (e) { console.error(e); }
 }
 
@@ -216,79 +229,56 @@ function backToMyFarm() {
     refreshData();
 }
 
-// --- Farm Rendering & Interaction ---
-
-const CROP_ICONS = {
-    'wheat': '🌾', 'corn': '🌽', 'carrot': '🥕', 'tomato': '🍅',
-    'potato': '🥔', 'pumpkin': '🎃', 'strawberry': '🍓',
-    'watermelon': '🍉', 'grape': '🍇', 'radish': '🥣'
-};
-
-function renderFarm(farms, isMine) {
-    const grid = document.getElementById('farm-grid');
-    grid.innerHTML = '';
-
-    const farmMap = {};
-    farms.forEach(f => { farmMap[`${f.x},${f.y}`] = f; });
-
-    // 9x9 Grid (y=8 to 0)
-    for (let y = 8; y >= 0; y--) {
-        for (let x = 0; x < 9; x++) {
-            const farm = farmMap[`${x},${y}`];
-            const div = document.createElement('div');
-            div.className = 'plot';
-
-            if (farm && farm.isUnlocked) { // 或者是别人的已解锁地块
-                div.classList.add('unlocked');
-
-                if (farm.cropId) {
-                    const icon = CROP_ICONS[marketData.seeds[farm.cropId]?.cropId] || '🌱';
-                    const seedInfo = marketData.seeds[farm.cropId];
-                    if (seedInfo) {
-                        const growTime = seedInfo.growTime;
-                        const plantedAt = new Date(farm.plantedAt).getTime();
-                        const now = Date.now();
-                        const progress = now - plantedAt;
-
-                        if (progress >= growTime) {
-                            div.innerText = icon;
-                            div.classList.add('grown');
-                            // Interaction
-                            if (isMine) div.onclick = () => harvest(x, y);
-                            else div.onclick = () => steal(x, y); // 偷菜!
-                        } else {
-                            div.innerText = '🌱';
-                            const remaining = Math.ceil((growTime - progress) / 1000 / 60);
-                            div.innerHTML = `🌱<div class="plot-timer">${remaining}m</div>`;
-                            if (!isMine) div.style.cursor = 'not-allowed'; // 还没熟不能偷
-                            else div.onclick = () => alert("还没熟呢");
-                        }
-                    }
+// 交互处理函数
+function handleFarmInteraction(x, y) {
+    if (gameState.isVisiting) {
+        // 访问模式：尝试偷菜
+        const farm = gameState.visitFarms.find(f => f.x === x && f.y === y);
+        if (farm && farm.isUnlocked && farm.cropId) {
+            // 检查是否成熟
+            const seed = marketData.seeds[farm.cropId];
+            if (seed) {
+                const now = Date.now();
+                const planted = new Date(farm.plantedAt).getTime();
+                if (now - planted >= seed.growTime) {
+                    steal(x, y);
                 } else {
-                    // 空地
-                    if (isMine) div.onclick = () => openPlantMenu(x, y);
-                    // 别人的空地没法操作
-                }
-            } else {
-                // 锁定/不可见
-                if (isMine) {
-                    // 我的未解锁
-                    div.innerText = '🔒';
-                    div.style.opacity = '0.5';
-                    div.onclick = () => buyLand(x, y);
-                } else {
-                    // 别人的未解锁 (隐藏或灰色)
-                    div.style.background = '#e2e8f0';
+                    alert("还没熟呢，不能偷！");
                 }
             }
-            grid.appendChild(div);
+        }
+    } else {
+        // 自己的农场
+        const farm = gameState.myFarms.find(f => f.x === x && f.y === y);
+        if (!farm) return; // 异常
+
+        if (farm.isUnlocked) {
+            if (farm.cropId) {
+                // 有作物：尝试收获
+                const seed = marketData.seeds[farm.cropId];
+                if (seed) {
+                    const now = Date.now();
+                    const planted = new Date(farm.plantedAt).getTime();
+                    if (now - planted >= seed.growTime) {
+                        harvest(x, y);
+                    } else {
+                        alert("还没熟呢");
+                    }
+                }
+            } else {
+                // 空地：种植
+                openPlantMenu(x, y);
+            }
+        } else {
+            // 未解锁：购买
+            buyLand(x, y);
         }
     }
 }
 
 // Actions
 async function buyLand(x, y) {
-    if (!confirm(`花费 1000 金币解锁 (${x},${y})?`)) return;
+    if (!confirm(`花费 100 金币解锁 (${x},${y})?`)) return;
     apiCall('/farm/buy', { userId: currentUser.id, x, y });
 }
 
@@ -472,18 +462,18 @@ function renderShopTabContent(tab) {
                     <p style="color:#eab308">💰 ${c.price}</p>
                      <button class="btn btn-sm btn-danger" onclick="apiCall('/market/buy/character', {userId:currentUser.id, characterId:${c.id}})">签约</button>
                 </div>
+                </div>
             `;
         });
-
-
-        // Toast
-        function showToast(msg) {
-            const list = document.getElementById('toast-container');
-            const div = document.createElement('div');
-            div.className = 'toast';
-            div.innerHTML = `<div class="toast-title">消息</div><div class="toast-msg">${msg}</div>`;
-            list.appendChild(div);
-            setTimeout(() => div.remove(), 5000);
-        }
     }
+}
+
+// Toast
+function showToast(msg) {
+    const list = document.getElementById('toast-container');
+    const div = document.createElement('div');
+    div.className = 'toast';
+    div.innerHTML = `<div class="toast-title">消息</div><div class="toast-msg">${msg}</div>`;
+    list.appendChild(div);
+    setTimeout(() => div.remove(), 5000);
 }
