@@ -120,8 +120,6 @@ const CHARACTERS = [
     { name: '十六夜咲夜', description: '《东方Project》女仆时钟少女', imagePath: '/images/characters/sakuya.jpg', price: 100000 },
     { name: '铃仙·优昙华院·因幡', description: '《东方Project》兔女郎少女', imagePath: '/images/characters/reisen.jpg', price: 100000 },
     { name: '芙兰达', description: '《东方Project》吸血少女', imagePath: '/images/characters/flandre2.jpg', price: 100000 },
-    { name: '雾雨魔理沙2', description: '《东方Project》魔法少女', imagePath: '/images/characters/marisa2.jpg', price: 100000 },
-    { name: '十六夜咲夜2', description: '《东方Project》女仆少女', imagePath: '/images/characters/sakuya2.jpg', price: 100000 },
     { name: '高海千歌', description: '《LoveLive!》元气少女', imagePath: '/images/characters/chika2.jpg', price: 100000 },
     { name: '樱内梨子', description: '《LoveLive!》钢琴少女', imagePath: '/images/characters/riko.jpg', price: 100000 },
     { name: '松浦果南', description: '《LoveLive!》泳装少女', imagePath: '/images/characters/kanan.jpg', price: 100000 },
@@ -141,7 +139,7 @@ const CHARACTERS = [
 
     { name: '天羽雅音', description: '《偶像少女》温柔甜美', imagePath: '/images/characters/maon.jpg', price: 100000 },
     { name: '北条加蓮', description: '《偶像大师》可爱少女', imagePath: '/images/characters/karen2.jpg', price: 100000 },
-    { name: '小鸟游六花2', description: '《中二病也要谈恋爱》少女', imagePath: '/images/characters/rokka2.jpg', price: 100000 },
+
     { name: '西园寺世界', description: '《School Days》经典少女', imagePath: '/images/characters/sekai.jpg', price: 100000 },
     { name: '桂言叶', description: '《School Days》温柔少女', imagePath: '/images/characters/kotonoha.jpg', price: 100000 },
     { name: '宫本茉莉', description: '《偶像少女》活泼少女', imagePath: '/images/characters/mari.jpg', price: 100000 },
@@ -149,7 +147,7 @@ const CHARACTERS = [
     { name: '三笠·阿克曼', description: '《进击的巨人》冷酷少女', imagePath: '/images/characters/mikasa.jpg', price: 100000 },
     { name: '阿尔敏少女版', description: '《进击的巨人》可爱少女', imagePath: '/images/characters/armin_female.jpg', price: 100000 },
     { name: '艾伦少女版', description: '《进击的巨人》少女版本', imagePath: '/images/characters/eren_female.jpg', price: 100000 },
-    { name: '三千院凪2', description: '《旋风管家》高冷少女', imagePath: '/images/characters/nagi2.jpg', price: 100000 },
+
 ];
 
 
