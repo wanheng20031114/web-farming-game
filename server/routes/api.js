@@ -159,7 +159,7 @@ router.get('/data', async (req, res) => {
 // 购买地块
 router.post('/farm/buy', async (req, res) => {
     const { userId, x, y } = req.body;
-    const PRICE = 100;
+    const PRICE = 1000;
 
     const t = await sequelize.transaction();
     try {
